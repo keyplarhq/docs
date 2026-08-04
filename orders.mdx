@@ -1,0 +1,87 @@
+---
+title: "Orders"
+description: "Find any purchase, see exactly what was delivered, and get a customer back into their order when email fails."
+icon: "receipt"
+---
+
+**Orders** in the admin panel is the record of everything sold through your store, however it
+arrived — a live purchase, a webhook, or an [import](/import).
+
+## Finding an order
+
+The list is searchable by customer email, and by order details. Each row shows the customer, what
+they bought, the amount and the status.
+
+<Note>
+  Subscription **renewals** are hidden from this list on purpose. A store with a few hundred
+  subscribers generates thousands of renewal orders, and they'd bury everything else. They're
+  still recorded — open the [subscription](/subscriptions) to see every payment, or open a
+  renewal order directly by its link.
+</Note>
+
+## What an order shows you
+
+Open one and you see:
+
+- The customer and the email the purchase was made under
+- Every product on the order
+- Every benefit granted, with its current state — the license key that was issued, which files
+  are downloadable, whether the GitHub invite was claimed
+- Which gateway it came from, and its status
+
+If an order shows products but no benefits, the products it matched carry none — usually a
+[placeholder product](/catalog/products#auto-created-products) from an unmapped external ID.
+
+## Refunds
+
+Refund in your gateway, not in Keyplar. The webhook arrives and Keyplar:
+
+- Marks the order refunded
+- Revokes its benefits
+- Blocks its downloads
+- Stops its license keys validating
+- Removes GitHub collaborator access and cancels pending invitations
+
+A replayed event never re-grants a refunded order, so there's no risk of a late webhook undoing
+the revocation.
+
+<Warning>
+  Refunds must be issued at the gateway. There is no refund button in Keyplar — the money never
+  passed through it.
+</Warning>
+
+## Help a customer who can't get to their order
+
+Open the order and use **Signed access link**. It generates a URL that opens this one order —
+products, benefits, working download buttons and license keys — **without signing in**. The same
+thing the customer saw right after checkout.
+
+It expires in **one hour**, and it's not emailed: copy it and send it through whatever support
+channel you're already using.
+
+<Note>
+  A signed order link grants access to **that order only**, and never transfers ownership. If
+  someone else opens it and signs in with their own account, the order still belongs to the
+  original buyer.
+</Note>
+
+For someone who can't get into their account at all — not just one order — use the [24-hour
+account access link](/customers#help-a-customer-who-cannot-sign-in) on the customer's page
+instead.
+
+## Where orders come from
+
+| Source | When |
+| --- | --- |
+| Post-checkout redirect | The moment the buyer finishes paying |
+| Webhook | Refunds, renewals, and buyers who closed the tab |
+| [Import](/import) | Backfilling what you sold before Keyplar |
+
+All three run through the same path and deduplicate against each other, so the same purchase
+never becomes two orders.
+
+## Mixed carts and subscriptions
+
+A checkout containing both a one-off item and a subscription is recorded as one order — it isn't
+split. That first order is also the subscription's first payment; subsequent renewals arrive as
+their own orders linked to the subscription.

@@ -1,0 +1,125 @@
+---
+title: "Lemon Squeezy"
+description: "Connect a Lemon Squeezy store: API key, webhook events, checkout redirect and Variant ID mapping."
+icon: "lemon"
+---
+
+Keyplar reads your Lemon Squeezy store, receives its webhooks, and maps purchases to your catalog
+by **Variant ID**. Lemon Squeezy's own license keys are imported and kept in sync rather than
+replaced.
+
+## Connect Lemon Squeezy
+
+<Steps>
+  <Step title="Create an API key">
+    In Lemon Squeezy, go to **Settings → API** and create a key. Copy it — it's shown once.
+
+    Keyplar uses it to read orders, subscriptions, license keys and products, both for
+    post-checkout fulfillment and for [import](/import).
+  </Step>
+
+  <Step title="Add the webhook">
+    Go to **Settings → Webhooks → Add endpoint** and use your store's webhook URL:
+
+    ```
+    https://yourstore.keyplar.com/webhooks
+    ```
+
+    Set a signing secret of your choosing, and subscribe to these events:
+
+    | Event | Why |
+    | --- | --- |
+    | `order_created` | One-off purchases |
+    | `order_refunded` | Refunds — revokes the order's benefits |
+    | `subscription_created` | Starts tracking a subscription |
+    | `subscription_updated` | Plan and status changes |
+    | `subscription_paused`, `subscription_unpaused`, `subscription_resumed` | Pause lifecycle |
+    | `subscription_cancelled`, `subscription_expired` | Cancellation — revokes benefits |
+    | `subscription_payment_success` | Renewals |
+    | `subscription_payment_recovered` | A recovered failed payment |
+    | `subscription_payment_failed` | Failed renewal |
+    | `subscription_payment_refunded` | Refunded renewal |
+    | `license_key_created`, `license_key_updated` | Keeps Lemon Squeezy's keys in sync |
+
+    Other events are accepted and ignored.
+  </Step>
+
+  <Step title="Save the credentials in Keyplar">
+    In your admin panel, open **Settings** → the **Lemon Squeezy** panel:
+
+    - **Secret key** — the API key
+    - **Webhook secret** — the signing secret you set on the webhook
+    - **Store ID** — optional, if your account has several stores
+
+    Save. The panel switches to **Configured**.
+  </Step>
+
+  <Step title="Set the post-checkout redirect">
+    The panel shows the URL to use:
+
+    ```
+    https://yourstore.keyplar.com/orders/complete?order_identifier=[order_identifier]
+    ```
+
+    Set it as the product's **confirmation / thank-you redirect** in Lemon Squeezy.
+
+    <Warning>
+      `[order_identifier]` is a Lemon Squeezy link variable and must be kept exactly as written,
+      square brackets included. Do **not** substitute the numeric `order_id` — it's a different
+      value and fulfillment will fail. See [Lemon Squeezy's link
+      variables](https://docs.lemonsqueezy.com/help/products/link-variables).
+    </Warning>
+  </Step>
+</Steps>
+
+## Map products by Variant ID
+
+Lemon Squeezy products have **variants**; that's the level Keyplar maps on, so different pricing
+tiers of one product can grant different benefits.
+
+<Steps>
+  <Step title="Find the Variant ID">
+    In Lemon Squeezy, open the product and its variant. The numeric variant ID appears in the
+    URL and in the variant's details.
+  </Step>
+  <Step title="Paste it into the Keyplar product">
+    **Products** → your product → the **Lemon Squeezy** mapping field.
+  </Step>
+</Steps>
+
+## Things specific to Lemon Squeezy
+
+### Lemon Squeezy owns its license keys
+
+If a variant has license keys enabled, those keys belong to Lemon Squeezy. Keyplar imports them
+with their original values and keeps them in step:
+
+- Disabling a key in Keyplar disables it in Lemon Squeezy, and vice versa
+- Deactivating a seat in Keyplar deactivates the corresponding instance in Lemon Squeezy
+- **Regenerating is not available** for Lemon Squeezy orders — the key lives upstream
+
+Activation limits and license length from the variant become the benefit's options.
+
+### Catalog sync can create benefits for you
+
+When Keyplar syncs your Lemon Squeezy catalog it can create matching benefits automatically:
+
+| In Lemon Squeezy | Becomes |
+| --- | --- |
+| Variant with license keys enabled | A **License key** benefit, with the variant's activation limit and license length |
+| Attached files | A **Download** benefit |
+| Product links | A **Link** benefit |
+
+License benefits with identical options are shared rather than duplicated, so ten variants with
+the same terms produce one benefit, not ten.
+
+### The first invoice isn't double-counted
+
+`subscription_payment_success` fires for the initial payment as well as renewals. Keyplar records
+only the renewals as separate payments — the initial one is already the `order_created` order.
+
+## Testing
+
+Lemon Squeezy's test mode issues test orders through the same webhooks. Point a test-mode webhook
+at the same URL, use test-mode API credentials, and run a purchase end to end — the redirect,
+order creation and license import all behave the same.

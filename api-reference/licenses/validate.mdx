@@ -1,0 +1,189 @@
+---
+title: "Validate a license"
+sidebarTitle: "Validate"
+description: "POST /api/v1/licenses/validate — check whether a key is good, optionally for a specific machine."
+icon: "circle-check"
+---
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer ak_…` — see [Authentication](/api-reference/introduction#authentication).
+</ParamField>
+
+```
+POST /api/v1/licenses/validate
+```
+
+## Body
+
+<ParamField body="licenseKey" type="string" required>
+  The customer's license key.
+</ParamField>
+
+<ParamField body="instanceId" type="string">
+  An activation ID, if you want to confirm this specific machine is still registered. Must be a
+  UUID.
+
+  Omit it to check the key alone.
+</ParamField>
+
+## Response
+
+Always `200 OK` when the request itself is well-formed. Read `valid`.
+
+<ResponseField name="valid" type="boolean">
+  Whether the license may be used right now.
+</ResponseField>
+
+<ResponseField name="error" type="string | null">
+  Why not, when `valid` is `false`. `null` otherwise.
+</ResponseField>
+
+Plus the standard [context block](/api-reference/introduction#how-responses-work) — `license`,
+`instance`, `order`, `product`, `customer`, `benefit`.
+
+## Why a license can be invalid
+
+| `error` | What happened |
+| --- | --- |
+| `Invalid license key` | No such key in this store |
+| `License instance not found` | The `instanceId` doesn't belong to this key, or it was deactivated |
+| `License key has been disabled` | Switched off by the merchant, or by the gateway that owns it |
+| `License is not active` | The order was refunded, or the subscription behind it was cancelled |
+| `License key has expired` | Past its expiry date |
+
+<Note>
+  For an unknown key, the context block comes back empty — blank IDs, `status: "revoked"`. Check
+  `valid` and `error` rather than reading anything out of it.
+</Note>
+
+## Checking the machine as well as the key
+
+Passing `instanceId` is what stops a key being shared: without it, ten people running the same
+key all validate successfully. With it, each installation must hold an activation of its own, and
+the activation limit does its job.
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://yourstore.keyplar.com/api/v1/licenses/validate \
+  -H "Authorization: Bearer ak_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "licenseKey": "ACME-4F3A-9C21-BE77",
+    "instanceId": "6f1d2c8a-3b7e-4a19-9f52-0d8e1a4c7b30"
+  }'
+```
+
+```js Node.js
+const res = await fetch(
+  "https://yourstore.keyplar.com/api/v1/licenses/validate",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.KEYPLAR_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      licenseKey: "ACME-4F3A-9C21-BE77",
+      instanceId: storedInstanceId,
+    }),
+  },
+);
+
+const data = await res.json();
+
+if (!res.ok) {
+  throw new Error(data.error);
+}
+
+if (!data.valid) {
+  console.log("License rejected:", data.error);
+} else {
+  console.log("Licensed to", data.customer.email, "for", data.product.name);
+}
+```
+
+```python Python
+import os
+import requests
+
+res = requests.post(
+    "https://yourstore.keyplar.com/api/v1/licenses/validate",
+    headers={"Authorization": f"Bearer {os.environ['KEYPLAR_API_KEY']}"},
+    json={
+        "licenseKey": "ACME-4F3A-9C21-BE77",
+        "instanceId": stored_instance_id,
+    },
+    timeout=10,
+)
+res.raise_for_status()
+data = res.json()
+
+if not data["valid"]:
+    print("License rejected:", data["error"])
+else:
+    print("Licensed to", data["customer"]["email"], "for", data["product"]["name"])
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Valid
+{
+  "valid": true,
+  "error": null,
+  "license": {
+    "key": "ACME-4F3A-9C21-BE77",
+    "status": "active",
+    "activationLimit": 3,
+    "activationUsage": 1,
+    "expiresAt": null,
+    "createdAt": "2026-02-11T09:14:22.481Z"
+  },
+  "instance": {
+    "id": "6f1d2c8a-3b7e-4a19-9f52-0d8e1a4c7b30",
+    "name": "Sam's MacBook Pro",
+    "createdAt": "2026-02-11T09:15:03.117Z"
+  },
+  "order": {
+    "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0195c1",
+    "status": "paid"
+  },
+  "product": {
+    "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d019500",
+    "name": "Acme Editor Pro"
+  },
+  "customer": {
+    "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0194aa",
+    "email": "sam@example.com"
+  },
+  "benefit": {
+    "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0193bb",
+    "name": "Pro license",
+    "type": "license"
+  }
+}
+```
+
+```json Expired
+{
+  "valid": false,
+  "error": "License key has expired",
+  "license": {
+    "key": "ACME-4F3A-9C21-BE77",
+    "status": "expired",
+    "activationLimit": 3,
+    "activationUsage": 1,
+    "expiresAt": "2026-01-01T00:00:00.000Z",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  "instance": null,
+  "order": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0195c1", "status": "paid" },
+  "product": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d019500", "name": "Acme Editor Pro" },
+  "customer": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0194aa", "email": "sam@example.com" },
+  "benefit": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0193bb", "name": "Pro license", "type": "license" }
+}
+```
+
+</ResponseExample>

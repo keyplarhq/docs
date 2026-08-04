@@ -1,0 +1,123 @@
+---
+title: "Connecting a payment gateway"
+sidebarTitle: "Overview"
+description: "How Keyplar listens to Stripe, Lemon Squeezy and Polar — and the two URLs every connection needs."
+icon: "plug"
+---
+
+Keyplar doesn't take payments. It connects to the gateway you already sell through, and turns
+what happens there into orders, customers and delivered benefits in your store.
+
+<CardGroup cols={3}>
+  <Card title="Stripe" icon="stripe" href="/gateways/stripe" />
+  <Card title="Lemon Squeezy" icon="lemon" href="/gateways/lemon-squeezy" />
+  <Card title="Polar" icon="snowflake" href="/gateways/polar" />
+</CardGroup>
+
+## What a connection consists of
+
+Every gateway needs the same four things, set on **Settings** in your admin panel.
+
+### Credentials you paste into Keyplar
+
+<ParamField path="Secret key" type="required">
+  The API key Keyplar uses to read orders, subscriptions and customers back from the gateway.
+  Needed for the post-checkout redirect and for [importing history](/import).
+</ParamField>
+
+<ParamField path="Webhook secret" type="required">
+  The signing secret for your webhook endpoint. Keyplar verifies every incoming event against
+  it and rejects anything that doesn't match.
+</ParamField>
+
+<ParamField path="Store / account / organization ID" type="optional">
+  Scopes the connection to one account when your gateway credentials can see several. The label
+  differs per gateway — see each gateway's page.
+</ParamField>
+
+Credentials are encrypted before they're stored and are only ever used by your store. Once
+saved, they're never shown back to you; you replace them rather than read them.
+
+### URLs you paste into the gateway
+
+<ParamField path="Webhook URL" type="required">
+  `https://yourstore.keyplar.com/webhooks`
+
+  One URL for every gateway you connect. Keyplar identifies which gateway sent an event from the
+  request itself.
+</ParamField>
+
+<ParamField path="Post-checkout redirect" type="strongly recommended">
+  Shown on each gateway panel, in the form `https://yourstore.keyplar.com/orders/complete?…`.
+  The query parameter differs per gateway and **must be kept exactly as written** — it's a
+  placeholder your gateway fills in.
+</ParamField>
+
+<Note>
+  Both URLs use your store's own address. If you later move to a [custom
+  domain](/settings/custom-domain), the panel shows the new URLs — update them at the gateway
+  when you do.
+</Note>
+
+## Why you need both the webhook and the redirect
+
+They cover different failures, and they're both idempotent, so there's no harm in both firing
+for one purchase.
+
+<Tabs>
+  <Tab title="The redirect">
+    Runs the instant the customer finishes paying. Keyplar fetches the order from the gateway,
+    delivers the benefits, and drops the customer on a page showing exactly what they bought —
+    with working download buttons and license keys — **before they've signed in**.
+
+    That page is a signed link valid for **one hour**. Without the redirect, your thank-you page
+    is whatever the gateway shows, and the customer has to find their way to your store and
+    request a sign-in link before they get anything.
+  </Tab>
+  <Tab title="The webhook">
+    Runs server-to-server, whether or not the customer's browser cooperated. It's the only way
+    Keyplar learns about:
+
+    - Refunds, and the revocations that follow
+    - Subscription renewals, changes and cancellations
+    - Purchases where the buyer closed the tab before being redirected
+
+    Skipping webhooks means refunded customers keep their downloads and renewals never appear.
+  </Tab>
+</Tabs>
+
+## Nothing is delivered twice
+
+Every webhook event carries an ID, and Keyplar remembers the ones it has processed. Gateways
+retry aggressively, and imports re-run the same orders — neither creates duplicate orders or
+issues a second license key.
+
+That also means a failed webhook is usually self-healing: the gateway retries, and the second
+attempt succeeds.
+
+## Connecting more than one gateway
+
+You can connect all three at once. Each has its own credentials and its own external ID mapping,
+and a single Keyplar product can map to all of them:
+
+| Keyplar product | Stripe | Lemon Squeezy | Polar |
+| --- | --- | --- | --- |
+| Pro license | `price_1AbC…` | `812345` | `f47ac10b-…` |
+
+Buyers land in the same store with the same account regardless of where they paid.
+
+## When a purchase doesn't match your catalog
+
+If an incoming order references an external ID you haven't mapped, Keyplar creates a placeholder
+product rather than dropping the order. You'll see it in **Products** with no benefits attached.
+
+Map the ID onto the real product — or [merge](/catalog/products#merge-duplicate-products) the
+placeholder into it — and existing orders pick up the benefits the next time they're viewed.
+
+## Checking a connection
+
+- **Settings** shows a **Configured** badge once credentials are saved.
+- Make a test purchase and confirm it appears under **Orders**.
+- If the order appears only after a delay, your redirect URL is probably missing or wrong.
+- If the order never appears, check the webhook's delivery log in your gateway — a rejected
+  signature means the webhook secret doesn't match.

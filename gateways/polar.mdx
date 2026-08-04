@@ -1,0 +1,114 @@
+---
+title: "Polar"
+description: "Connect a Polar organization: access token, webhook events, checkout redirect and Product ID mapping."
+icon: "snowflake"
+---
+
+Keyplar reads your Polar organization, receives its webhooks, and maps purchases to your catalog
+by **Product ID**. Polar's license keys are imported and kept in sync; its other benefit types
+are recorded so you can rebuild them natively in Keyplar.
+
+## Connect Polar
+
+<Steps>
+  <Step title="Create an access token">
+    In Polar, go to **Settings → Developers** and create an organization access token with read
+    access to orders, subscriptions, customers, products and benefits.
+
+    Keyplar uses it for post-checkout fulfillment and for [import](/import).
+  </Step>
+
+  <Step title="Add the webhook">
+    Go to **Settings → Webhooks → Add endpoint** and use your store's webhook URL:
+
+    ```
+    https://yourstore.keyplar.com/webhooks
+    ```
+
+    Choose a signing secret and subscribe to these events:
+
+    | Event | Why |
+    | --- | --- |
+    | `order.paid` | Purchases and renewals |
+    | `order.refunded` | Refunds — revokes the order's benefits |
+    | `subscription.created` | Starts tracking a subscription |
+    | `subscription.updated`, `subscription.active`, `subscription.past_due`, `subscription.uncanceled` | Status changes |
+    | `subscription.canceled`, `subscription.revoked` | Cancellation — revokes benefits |
+    | `benefit_grant.created`, `benefit_grant.updated`, `benefit_grant.revoked` | Keeps Polar's license keys in sync |
+
+    Other events are accepted and ignored.
+  </Step>
+
+  <Step title="Save the credentials in Keyplar">
+    In your admin panel, open **Settings** → the **Polar** panel:
+
+    - **Secret key** — the access token
+    - **Webhook secret** — the signing secret you set on the webhook
+    - **Organization ID** — the Polar organization this connection belongs to
+
+    <Note>
+      Working against Polar's sandbox? Prefix the organization ID with `sandbox:` — for example
+      `sandbox:f47ac10b-58cc-4372-a567-0e02b2c3d479`. That's what tells Keyplar to talk to the
+      sandbox API instead of production.
+    </Note>
+
+    Save. The panel switches to **Configured**.
+  </Step>
+
+  <Step title="Set the post-checkout redirect">
+    The panel shows the URL to use:
+
+    ```
+    https://yourstore.keyplar.com/orders/complete?checkout_id={CHECKOUT_ID}
+    ```
+
+    Set it as the `success_url` on your Checkout or Checkout Link
+    ([Polar docs](https://polar.sh/docs/features/checkout/links)).
+
+    <Warning>
+      Keep `{CHECKOUT_ID}` exactly as written, braces included. Polar substitutes the real value
+      at redirect time.
+    </Warning>
+  </Step>
+</Steps>
+
+## Map products by Product ID
+
+Polar maps at the product level. Copy the product's UUID from Polar and paste it into the
+**Polar** mapping field on your Keyplar product.
+
+## Things specific to Polar
+
+### Polar owns its license keys
+
+License keys issued by Polar are imported with their original values, along with their activation
+limits and expiry. Keyplar keeps them in step — a key revoked or disabled in Polar stops
+validating in Keyplar, and seat deactivations sync.
+
+**Regenerating is not available** for Polar orders; the key lives upstream.
+
+### Other Polar benefit types are recorded, not recreated
+
+When Keyplar syncs your Polar catalog, only license keys become a native Keyplar benefit. The
+rest are recorded as **Custom** benefits holding a note about what needs rebuilding:
+
+| Polar benefit | What Keyplar does |
+| --- | --- |
+| License keys | Creates a native **License key** benefit and imports the issued keys |
+| Downloadables | Records a note — Polar-hosted files aren't pulled. Re-upload them under a Keyplar [Download benefit](/benefits/downloads) |
+| GitHub repository | Records a note — set up a Keyplar [GitHub access benefit](/benefits/github-access) to deliver invitations from your store |
+| Discord, Slack, credits, feature flags | Recorded as a note so nothing is silently lost |
+
+Those notes are visible to your customers, so replace them with real benefits before you point
+buyers at your store.
+
+### License benefits with identical terms are shared
+
+Ten Polar products with the same activation limit and expiry produce one Keyplar license benefit,
+attached to all ten — not ten near-identical benefits.
+
+## Testing
+
+Use Polar's sandbox: sandbox credentials, the `sandbox:` organization ID prefix, and a
+sandbox-mode webhook pointed at the same URL. The redirect, order creation and license import all
+behave identically.

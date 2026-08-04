@@ -1,0 +1,78 @@
+---
+title: "What your customers see"
+sidebarTitle: "Customer portal"
+description: "A tour of the buyer's side of your store, so you know what you're pointing people at."
+icon: "user"
+---
+
+Every store has two sides on the same address. You see the admin panel; your customers see the
+portal. This is what they get.
+
+## The post-checkout page
+
+The first thing they see, before any account exists in their mind. After paying, they're
+redirected straight to a page showing:
+
+- What they bought
+- Every benefit it granted — the license key in full, working download buttons, a GitHub
+  invitation to claim
+- An option to sign in and see the rest of their orders
+
+No sign-in required, and no waiting for an email. The link is signed and valid for **one hour**.
+
+<Note>
+  This page only exists if you've set the [post-checkout
+  redirect](/gateways/overview#why-you-need-both-the-webhook-and-the-redirect) at your gateway.
+  Without it, the customer's first experience is your gateway's own thank-you page, and they have
+  to find their way to your store themselves.
+</Note>
+
+## Signing in
+
+At `https://yourstore.keyplar.com/login`, showing your store name and logo.
+
+They enter their email and continue. If they've set a password they're asked for it, with a
+one-time email link as the alternative. If they haven't, a magic link is sent automatically.
+Google and GitHub appear if you've [enabled them](/settings/store#customer-login).
+
+Whichever they use, the account they land in is the one their orders are already attached to —
+matched on the email address.
+
+## Inside the portal
+
+| Page | What's there |
+| --- | --- |
+| **Dashboard** | Their landing page after signing in |
+| **Orders** | Every purchase, with its products and benefits. Renewals are folded into the subscription rather than listed separately |
+| **Subscriptions** | Recurring plans, with the option to cancel |
+| **Downloads** | Every file they're entitled to, across all their orders |
+| **Licenses** | Their keys, with the machines each is activated on, and the ability to free a seat |
+| **Git Repos** | GitHub invitations to claim, and ones already claimed |
+| **Account** | Profile, setting a password, data export, account deletion |
+
+Everything is scoped to what they've actually bought. A refunded order's downloads stop working;
+a cancelled subscription's benefits disappear.
+
+## What they can do without you
+
+The point of the portal is that most support requests answer themselves:
+
+- Re-download a file after losing it
+- Find a license key they've misplaced
+- Free an activation after reinstalling their machine
+- Cancel a subscription
+- Claim a GitHub invitation
+- Export their data or delete their account
+
+## What still needs you
+
+- Getting in when sign-in email fails → [account access link](/customers#help-a-customer-who-cant-sign-in)
+- Reaching one order when they can't sign in at all → [signed order link](/orders#help-a-customer-who-cant-get-to-their-order)
+- Replacing a leaked key → [regenerate](/licenses#actions), where the gateway allows it
+- Refunds → always at your gateway
+
+## Branding
+
+On plans with branding, the portal carries your logo on the login and order pages and drops the
+"Powered by Keyplar" mark. With a [custom domain](/settings/custom-domain), customers never see
+a keyplar.com address at all.

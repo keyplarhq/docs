@@ -1,0 +1,108 @@
+---
+title: "File downloads"
+description: "Upload the files your product ships, ship new versions, and control who can still download what."
+icon: "download"
+---
+
+A **File Downloads** benefit holds a list of files. Every customer who owns a product carrying
+that benefit sees the enabled files on their order and in their portal, and downloads them
+through links that are signed and expire.
+
+## Create the benefit
+
+**Benefits** → **New benefit** → **File Downloads**. Name it for customers (`Acme Editor
+installers`), then drag files onto the upload area or click to browse. Multiple files at once
+is fine.
+
+Each file has:
+
+<ParamField path="Title" type="required">
+  What the customer sees. Defaults to the filename — usually worth improving to something like
+  `macOS (Apple Silicon)`.
+</ParamField>
+
+<ParamField path="Version" type="optional">
+  A free-text version label, shown next to the title. `2.4.1`, `2024.3`, whatever you use.
+</ParamField>
+
+<ParamField path="Enabled" type="toggle">
+  Off hides the file from customers **immediately**, without deleting it.
+</ParamField>
+
+You can drag files to reorder them; that's the order customers see.
+
+The upload area tells you the maximum size per file on your plan.
+
+## How customers get the file
+
+Nothing is ever served from a public URL. When a customer clicks download, Keyplar checks they
+still own the benefit and mints a signed link that expires shortly after. The link can't be
+guessed, and a shared one stops working quickly.
+
+Downloads are blocked when the order was refunded, or when the subscription behind it was
+cancelled.
+
+## Shipping a new version
+
+Two approaches, both fine:
+
+<Tabs>
+  <Tab title="Replace">
+    Upload the new build, set its version, and turn the old one **off**. Customers see only the
+    current release; the old file stays available to you if you need to roll back.
+  </Tab>
+  <Tab title="Keep a history">
+    Upload the new build and leave older ones enabled. Customers can download previous versions
+    — useful when a release breaks something and people need to go back.
+  </Tab>
+</Tabs>
+
+Either way the change is live the moment you save. There's nothing to re-issue and no customer
+to notify — the files attach to the benefit, not to individual orders.
+
+## Storage, file size and bandwidth
+
+Downloads are the one benefit type with limits attached to your plan:
+
+| Limit | What it caps |
+| --- | --- |
+| **Total storage** | How much you can hold across all download benefits |
+| **Max file size** | The biggest single file you can upload |
+| **Monthly bandwidth** | How much customers can download per month |
+
+Current usage is on **Billing**, next to your plan's allowances.
+
+### What happens when you hit a limit
+
+<AccordionGroup>
+  <Accordion title="Storage full" icon="hard-drive">
+    Uploads are blocked. **Everything already published keeps serving** — customers are never cut
+    off because you ran out of storage, and nothing is deleted. Free space by removing files you
+    no longer ship, or upgrade.
+  </Accordion>
+  <Accordion title="Bandwidth exhausted" icon="gauge">
+    Downloads pause for the rest of the month. You get warning emails at 80% and again at 100%
+    before that happens, so it shouldn't come as a surprise.
+  </Accordion>
+  <Accordion title="File too large" icon="file">
+    The upload is rejected before it starts. Upgrade for a larger ceiling, or split the release.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  Bandwidth is counted when a download link is issued, using the file's size — not by measuring
+  what actually transferred. A customer who clicks download and cancels still counts. It's an
+  upper bound, so your real usage is always at or below what you see.
+</Note>
+
+### Downgrading with more stored than the new plan allows
+
+Nothing is deleted. The store goes read-only for uploads until you're back under the limit, and
+existing files keep serving.
+
+## Tips
+
+- Give every file a clear title and version — "Download" repeated four times helps nobody
+- Turning a file off is instant and reversible; deleting is neither
+- Big installers eat bandwidth fast. If you ship multi-gigabyte builds to a large customer base,
+  check the bandwidth allowance on [your plan](/billing) before you launch

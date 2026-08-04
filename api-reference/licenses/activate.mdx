@@ -1,0 +1,179 @@
+---
+title: "Activate a license"
+sidebarTitle: "Activate"
+description: "POST /api/v1/licenses/activate — claim a seat for a machine and get back an activation ID."
+icon: "plus"
+---
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer ak_…` — see [Authentication](/api-reference/introduction#authentication).
+</ParamField>
+
+```
+POST /api/v1/licenses/activate
+```
+
+Registers one machine against a license and returns its activation ID. Call this once per
+installation, on first run.
+
+## Body
+
+<ParamField body="licenseKey" type="string" required>
+  The customer's license key.
+</ParamField>
+
+<ParamField body="instanceName" type="string" required>
+  A name for this machine, 1–200 characters. The customer sees it in their portal when deciding
+  which seat to free, so make it recognisable — a hostname, a device name, `Sam's MacBook Pro`.
+</ParamField>
+
+## Response
+
+Always `200 OK` when the request itself is well-formed. Read `activated`.
+
+<ResponseField name="activated" type="boolean">
+  Whether a seat was claimed.
+</ResponseField>
+
+<ResponseField name="error" type="string | null">
+  Why not, when `activated` is `false`.
+</ResponseField>
+
+<ResponseField name="instance" type="object | null">
+  The new activation on success. **Persist `instance.id`** — you need it to validate this machine
+  and to release the seat later.
+</ResponseField>
+
+Plus the standard [context block](/api-reference/introduction#how-responses-work).
+
+## Why an activation can fail
+
+| `error` | What happened |
+| --- | --- |
+| `This license key has reached the activation limit.` | Every seat is in use. The customer frees one from their portal, or you do from [Licenses](/licenses) |
+| `Invalid license key` | No such key in this store |
+| `License key has been disabled` | Switched off by the merchant or the gateway |
+| `License is not active` | The order was refunded, or the subscription was cancelled |
+| `License key has expired` | Past its expiry date |
+
+<Warning>
+  **Store the `instance.id`.** Calling activate again creates a *second* activation and burns
+  another seat — it doesn't return the previous one. If you lose the ID, the customer has to free
+  the orphaned seat by hand.
+</Warning>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://yourstore.keyplar.com/api/v1/licenses/activate \
+  -H "Authorization: Bearer ak_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "licenseKey": "ACME-4F3A-9C21-BE77",
+    "instanceName": "Sam'\''s MacBook Pro"
+  }'
+```
+
+```js Node.js
+import os from "node:os";
+
+const res = await fetch(
+  "https://yourstore.keyplar.com/api/v1/licenses/activate",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.KEYPLAR_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      licenseKey: userEnteredKey,
+      instanceName: os.hostname(),
+    }),
+  },
+);
+
+const data = await res.json();
+
+if (!res.ok) {
+  throw new Error(data.error);
+}
+
+if (!data.activated) {
+  showMessage(data.error);
+} else {
+  saveInstanceId(data.instance.id);
+}
+```
+
+```python Python
+import os
+import socket
+import requests
+
+res = requests.post(
+    "https://yourstore.keyplar.com/api/v1/licenses/activate",
+    headers={"Authorization": f"Bearer {os.environ['KEYPLAR_API_KEY']}"},
+    json={
+        "licenseKey": user_entered_key,
+        "instanceName": socket.gethostname(),
+    },
+    timeout=10,
+)
+res.raise_for_status()
+data = res.json()
+
+if not data["activated"]:
+    show_message(data["error"])
+else:
+    save_instance_id(data["instance"]["id"])
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Activated
+{
+  "activated": true,
+  "error": null,
+  "license": {
+    "key": "ACME-4F3A-9C21-BE77",
+    "status": "active",
+    "activationLimit": 3,
+    "activationUsage": 2,
+    "expiresAt": null,
+    "createdAt": "2026-02-11T09:14:22.481Z"
+  },
+  "instance": {
+    "id": "9b3e7d15-2c48-4f6a-8e01-7a5c3b9d2e64",
+    "name": "Sam's MacBook Pro",
+    "createdAt": "2026-03-04T18:02:44.902Z"
+  },
+  "order": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0195c1", "status": "paid" },
+  "product": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d019500", "name": "Acme Editor Pro" },
+  "customer": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0194aa", "email": "sam@example.com" },
+  "benefit": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0193bb", "name": "Pro license", "type": "license" }
+}
+```
+
+```json Limit reached
+{
+  "activated": false,
+  "error": "This license key has reached the activation limit.",
+  "license": {
+    "key": "ACME-4F3A-9C21-BE77",
+    "status": "active",
+    "activationLimit": 3,
+    "activationUsage": 3,
+    "expiresAt": null,
+    "createdAt": "2026-02-11T09:14:22.481Z"
+  },
+  "instance": null,
+  "order": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0195c1", "status": "paid" },
+  "product": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d019500", "name": "Acme Editor Pro" },
+  "customer": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0194aa", "email": "sam@example.com" },
+  "benefit": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0193bb", "name": "Pro license", "type": "license" }
+}
+```
+
+</ResponseExample>

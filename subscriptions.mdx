@@ -1,0 +1,58 @@
+---
+title: "Subscriptions"
+description: "Track recurring customers, see every payment they've made, and cancel on their behalf."
+icon: "rotate"
+---
+
+**Subscriptions** lists the recurring plans your customers hold. Each one is created from your
+gateway — Keyplar never invents a subscription because a product looked recurring.
+
+## What a subscription shows
+
+Open one and you get:
+
+- The customer and the product
+- Current status, straight from the gateway
+- **Payments** — every linked order, the initial purchase and every renewal since
+
+That payments list is the only place renewals are shown in full. They're deliberately hidden from
+the [Orders](/orders) list so it stays readable.
+
+## Cancelling
+
+Customers cancel themselves from **Subscriptions** in their portal. You can also cancel on their
+behalf from the admin subscription page — useful when someone emails support instead.
+
+Either way, Keyplar cancels at the gateway first, then records it locally. When a later webhook
+arrives confirming the same cancellation, nothing happens twice.
+
+### What cancelling revokes
+
+The benefits granted by that subscription's product stop working, and they aren't quietly
+re-granted afterwards — as long as the subscription is cancelled, that product's benefits stay
+revoked.
+
+If the same customer holds the same product through a *different*, still-active subscription or a
+one-off purchase, that access is unaffected.
+
+<Note>
+  Cancelling in your gateway's dashboard works too — the webhook brings the change back to
+  Keyplar and the same revocation happens. Cancelling from Keyplar just saves you the trip.
+</Note>
+
+## Renewals
+
+A renewal payment arrives as a normal order linked to the subscription. Benefits that expire —
+license keys with an expiry, for instance — keep working because the subscription keeps them
+granted, not because a new key is issued.
+
+## Payment failures
+
+A failed renewal is reported by the gateway and reflected in the subscription's status. Keyplar
+doesn't dun customers or retry payments — your gateway owns that, including its own retry
+schedule and emails.
+
+## Card and billing details
+
+Customers manage their payment method at the gateway that charges them, not in Keyplar. Your
+store handles what they bought; the gateway handles how they pay for it.

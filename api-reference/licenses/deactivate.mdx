@@ -1,0 +1,162 @@
+---
+title: "Deactivate a license"
+sidebarTitle: "Deactivate"
+description: "POST /api/v1/licenses/deactivate — release a seat so the customer can use it elsewhere."
+icon: "minus"
+---
+
+<ParamField header="Authorization" type="string" required>
+  `Bearer ak_…` — see [Authentication](/api-reference/introduction#authentication).
+</ParamField>
+
+```
+POST /api/v1/licenses/deactivate
+```
+
+Releases one activation, freeing a seat against the license's activation limit. Call it when your
+software is uninstalled, signed out of, or moved to another machine.
+
+## Body
+
+<ParamField body="licenseKey" type="string" required>
+  The customer's license key.
+</ParamField>
+
+<ParamField body="instanceId" type="string" required>
+  The activation to release — the `instance.id` you stored when you
+  [activated](/api-reference/licenses/activate). Must be a UUID.
+</ParamField>
+
+## Response
+
+Always `200 OK` when the request itself is well-formed. Read `deactivated`.
+
+<ResponseField name="deactivated" type="boolean">
+  Whether the seat was released.
+</ResponseField>
+
+<ResponseField name="error" type="string | null">
+  Why not, when `deactivated` is `false`.
+</ResponseField>
+
+<ResponseField name="instance" type="null">
+  Always `null` here — the activation no longer exists.
+</ResponseField>
+
+Plus the standard [context block](/api-reference/introduction#how-responses-work), with
+`license.activationUsage` already reduced.
+
+## Why a deactivation can fail
+
+| `error` | What happened |
+| --- | --- |
+| `Invalid license key` | No such key in this store |
+| `License instance not found` | The activation doesn't belong to this key, or it was already deactivated |
+
+<Note>
+  Deactivation works even when the license itself is expired, disabled or revoked. Someone
+  uninstalling after their subscription lapsed still gets their seat cleaned up.
+</Note>
+
+## Idempotency
+
+Deactivating an activation that's already gone returns `deactivated: false` with `License
+instance not found`. That's usually fine to ignore — the seat is free either way, which is what
+you wanted.
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://yourstore.keyplar.com/api/v1/licenses/deactivate \
+  -H "Authorization: Bearer ak_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "licenseKey": "ACME-4F3A-9C21-BE77",
+    "instanceId": "9b3e7d15-2c48-4f6a-8e01-7a5c3b9d2e64"
+  }'
+```
+
+```js Node.js
+const res = await fetch(
+  "https://yourstore.keyplar.com/api/v1/licenses/deactivate",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.KEYPLAR_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      licenseKey: storedKey,
+      instanceId: storedInstanceId,
+    }),
+  },
+);
+
+const data = await res.json();
+
+if (data.deactivated) {
+  clearStoredLicense();
+}
+```
+
+```python Python
+import os
+import requests
+
+res = requests.post(
+    "https://yourstore.keyplar.com/api/v1/licenses/deactivate",
+    headers={"Authorization": f"Bearer {os.environ['KEYPLAR_API_KEY']}"},
+    json={"licenseKey": stored_key, "instanceId": stored_instance_id},
+    timeout=10,
+)
+res.raise_for_status()
+
+if res.json()["deactivated"]:
+    clear_stored_license()
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Deactivated
+{
+  "deactivated": true,
+  "error": null,
+  "license": {
+    "key": "ACME-4F3A-9C21-BE77",
+    "status": "active",
+    "activationLimit": 3,
+    "activationUsage": 1,
+    "expiresAt": null,
+    "createdAt": "2026-02-11T09:14:22.481Z"
+  },
+  "instance": null,
+  "order": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0195c1", "status": "paid" },
+  "product": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d019500", "name": "Acme Editor Pro" },
+  "customer": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0194aa", "email": "sam@example.com" },
+  "benefit": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0193bb", "name": "Pro license", "type": "license" }
+}
+```
+
+```json Not found
+{
+  "deactivated": false,
+  "error": "License instance not found",
+  "license": {
+    "key": "ACME-4F3A-9C21-BE77",
+    "status": "active",
+    "activationLimit": 3,
+    "activationUsage": 2,
+    "expiresAt": null,
+    "createdAt": "2026-02-11T09:14:22.481Z"
+  },
+  "instance": null,
+  "order": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0195c1", "status": "paid" },
+  "product": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d019500", "name": "Acme Editor Pro" },
+  "customer": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0194aa", "email": "sam@example.com" },
+  "benefit": { "id": "0195c1f4-8a2d-7c31-b6e9-4f8a2d0193bb", "name": "Pro license", "type": "license" }
+}
+```
+
+</ResponseExample>

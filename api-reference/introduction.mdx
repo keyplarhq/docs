@@ -1,0 +1,196 @@
+---
+title: "License API"
+sidebarTitle: "Introduction"
+description: "Validate, activate and deactivate license keys from your own software."
+icon: "code"
+---
+
+The License API lets your software check whether a customer's license key is good, register the
+machine it's running on, and release that seat again later.
+
+It's available on every plan, and calls are never metered.
+
+## Base URL
+
+Your store's own address:
+
+```
+https://yourstore.keyplar.com
+```
+
+If you've set up a [custom domain](/settings/custom-domain), use that instead. Every endpoint
+below is relative to it.
+
+## Create an API key
+
+<Steps>
+  <Step title="Open the API page">
+    In your admin panel, go to **API**.
+  </Step>
+  <Step title="Create a key">
+    Give it a name that says where it's used — `Desktop app production`, `License server`. Keys
+    carry the `licenses` scope.
+  </Step>
+  <Step title="Copy it now">
+    The key is shown **once**, at creation. Keyplar stores only a hash of it, so it can't be
+    shown again. Lose it and you create a new one.
+  </Step>
+</Steps>
+
+Keys look like `ak_` followed by 64 hex characters. Revoking a key from the same page stops it
+working immediately.
+
+## Authentication
+
+Send the key as a bearer token:
+
+```bash
+Authorization: Bearer ak_your_key_here
+```
+
+<Warning>
+  **API keys are server-side only.** A key shipped inside a desktop app, a mobile binary or
+  browser JavaScript can be extracted, and it can read every license in your store — not just the
+  caller's.
+
+  If your software must check licenses directly, put a small endpoint of your own in front: your
+  app calls your server, your server holds the key and calls Keyplar.
+</Warning>
+
+## Rate limits
+
+**60 requests per minute per API key.** Exceeding it returns `429` with a `Retry-After` header
+saying how many seconds to wait.
+
+Validating on every launch is fine. Validating in a loop, or on every keystroke, is not.
+
+## Endpoints
+
+<CardGroup cols={3}>
+  <Card title="Validate" icon="circle-check" href="/api-reference/licenses/validate">
+    Is this key good?
+  </Card>
+  <Card title="Activate" icon="plus" href="/api-reference/licenses/activate">
+    Claim a seat for this machine.
+  </Card>
+  <Card title="Deactivate" icon="minus" href="/api-reference/licenses/deactivate">
+    Release a seat.
+  </Card>
+</CardGroup>
+
+All three are `POST`, take JSON, and return JSON.
+
+## How responses work
+
+<Info>
+  A rejected **license** is not an HTTP error. "This key expired" comes back as `200 OK` with
+  `valid: false` and a message in `error`. HTTP status codes are reserved for problems with the
+  *request*.
+</Info>
+
+So:
+
+```js
+const res = await fetch(url, options);
+const data = await res.json();
+
+if (!res.ok) {
+  // Your problem: bad key, malformed body, rate limited
+}
+
+if (!data.valid) {
+  // The customer's problem: show data.error
+}
+```
+
+Every response carries the same context block, so one call tells you everything about the
+license and who it belongs to:
+
+<ResponseField name="license" type="object">
+  <Expandable title="properties">
+    <ResponseField name="key" type="string">The license key.</ResponseField>
+    <ResponseField name="status" type="string">
+      `active`, `inactive`, `expired`, `disabled` or `revoked`.
+    </ResponseField>
+    <ResponseField name="activationLimit" type="integer | null">
+      Maximum concurrent activations. `null` means unlimited.
+    </ResponseField>
+    <ResponseField name="activationUsage" type="integer">
+      How many activations are currently held.
+    </ResponseField>
+    <ResponseField name="expiresAt" type="string | null">
+      ISO 8601 timestamp, or `null` if the key never expires.
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp of when the key was issued.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="instance" type="object | null">
+  The activation this call concerns, when there is one.
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">Activation ID — store this.</ResponseField>
+    <ResponseField name="name" type="string">The machine name you supplied.</ResponseField>
+    <ResponseField name="createdAt" type="string">ISO 8601 timestamp.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="order" type="object">
+  `id` and `status` of the order the license came from.
+</ResponseField>
+
+<ResponseField name="product" type="object">
+  `id` and `name` of the product — useful for gating features by tier.
+</ResponseField>
+
+<ResponseField name="customer" type="object">
+  `id` and `email` of the license holder.
+</ResponseField>
+
+<ResponseField name="benefit" type="object">
+  `id`, `name` and `type` of the benefit that issued the key.
+</ResponseField>
+
+## HTTP errors
+
+| Status | Meaning | What to do |
+| --- | --- | --- |
+| `400` | Body isn't valid JSON, or fails validation. The response includes `details` with the offending field and message. | Fix the request |
+| `401` | Missing, malformed, unknown or revoked API key | Check the key |
+| `403` | The key lacks the `licenses` scope, or the store is suspended | Check the key's scopes |
+| `429` | Rate limit exceeded | Wait `Retry-After` seconds |
+
+```json 400 response
+{
+  "error": "Invalid request",
+  "details": [
+    { "path": "licenseKey", "message": "Too small: expected string to have >=1 characters" }
+  ]
+}
+```
+
+## The usual integration
+
+<Steps>
+  <Step title="Activate once, on first run">
+    Call [activate](/api-reference/licenses/activate) with the customer's key and a name for the
+    machine — hostname, device name, whatever helps them recognise it later in their portal.
+
+    Persist the `instance.id` you get back.
+  </Step>
+  <Step title="Validate on launch">
+    Call [validate](/api-reference/licenses/validate) with the key and the stored `instance.id`.
+    Act on `valid`.
+  </Step>
+  <Step title="Deactivate on the way out">
+    On uninstall or sign-out, call
+    [deactivate](/api-reference/licenses/deactivate) so the seat goes back to the customer.
+  </Step>
+</Steps>
+
+<Tip>
+  **Be generous when the network fails.** If your validation call times out, let the customer keep
+  working and retry later. Locking someone out of software they paid for because their WiFi
+  dropped generates support tickets, not revenue.
+</Tip>

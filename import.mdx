@@ -1,0 +1,86 @@
+---
+title: "Importing past orders"
+sidebarTitle: "Import"
+description: "Backfill everything you sold before Keyplar, so returning customers find their purchases already waiting."
+icon: "database"
+---
+
+Import pulls your history out of a connected gateway and into your store: customers, orders,
+subscriptions and — where the gateway issues them — license keys.
+
+Run it once when you set up, and again any time you suspect something was missed.
+
+## Before you start
+
+The gateway must be [connected](/gateways/overview) with valid credentials. Import reads through
+the gateway's API, so the same key that powers post-checkout fulfillment powers this.
+
+## Run an import
+
+Open **Import**. Each connected gateway has a card. Press **Start import**.
+
+It runs in the background — you can leave the page, close the tab, and come back. The card shows
+**Queued**, then **Running**, then **Last run complete**.
+
+### What it imports, in order
+
+<Steps>
+  <Step title="Catalog">
+    Products from the gateway, and their external ID mappings. Where the gateway describes
+    entitlements, matching benefits are created — see the
+    [Lemon Squeezy](/gateways/lemon-squeezy#catalog-sync-can-create-benefits-for-you) and
+    [Polar](/gateways/polar#other-polar-benefit-types-are-recorded-not-recreated) pages for what
+    each one brings across.
+  </Step>
+  <Step title="Orders">
+    Every past purchase, with its customer. Accounts are created for buyers who have never signed
+    in, so their orders are waiting when they do.
+  </Step>
+  <Step title="Subscriptions">
+    Recurring plans, linked to the orders that paid for them.
+  </Step>
+  <Step title="Licenses">
+    Only for gateways that issue their own keys — **Lemon Squeezy** and **Polar**. Existing keys
+    are imported with their original values, so customers keep the key they already have.
+  </Step>
+</Steps>
+
+## Re-running is safe
+
+Import tracks how far it got and resumes from there. Running it again picks up where it left off
+rather than starting over.
+
+Records are matched on the gateway's own order ID and updated in place, so nothing is duplicated
+and no second license key is issued — however many times you run it.
+
+### Restart from the beginning
+
+The **Restart from beginning** toggle clears that progress and re-runs every stage from scratch.
+Use it when you've fixed a catalog mapping and want old orders re-evaluated against it. It's just
+as safe: same upsert, no duplicates.
+
+## After the import
+
+Look at **Products** first. Purchases for external IDs you hadn't mapped will have created
+[placeholder products](/catalog/products#auto-created-products), each with no benefits attached.
+
+For each one, either adopt it — attach the benefits it should grant — or
+[merge](/catalog/products#merge-duplicate-products) it into the real product. Once the mapping is
+right, the benefits reach those old orders too.
+
+<Tip>
+  Do a small import first if you can — connect a test-mode account, import, and see what the
+  catalog looks like before running it against years of live sales.
+</Tip>
+
+## Limits and expectations
+
+- **How far back it reaches** depends on the gateway's API, and some go further than others.
+  Import takes what's available.
+- **It's throttled on purpose** so it doesn't trip your gateway's rate limits. A large history
+  takes a while; that's normal.
+- **Nothing is charged and nothing is emailed.** Importing an order doesn't notify the customer.
+- **A failed run isn't lost work.** The card shows the error, and starting again resumes from the
+  last completed point.
+
+Import is available on every plan.

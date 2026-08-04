@@ -1,0 +1,105 @@
+---
+title: "Custom domain"
+description: "Serve your store at your own address instead of the default keyplar.com subdomain."
+icon: "globe"
+---
+
+<Note>
+  Custom domains are available on plans that include branding — the **Pro** plan. One domain per
+  store. See [Billing and plans](/billing).
+</Note>
+
+By default your store lives at `https://yourstore.keyplar.com`. With a custom domain it lives at
+something like `https://shop.yourdomain.com`, and customers never see Keyplar in the address bar.
+
+## Set it up
+
+<Steps>
+  <Step title="Enter the domain">
+    **Settings** → **Custom domain**. Type the hostname you want — `shop.yourdomain.com` — and
+    save.
+
+    A subdomain is usually the right choice. You can use an apex domain (`yourdomain.com`), but
+    that commits the whole domain to your store.
+  </Step>
+
+  <Step title="Create the DNS records">
+    Keyplar shows the exact records to create at your DNS provider, with the type, name and value
+    to use. Typically:
+
+    - A **routing record** (A or CNAME) that points the domain at Keyplar
+    - A **TXT record** that proves you control the domain
+
+    Copy them exactly. Names and values differ per domain, so use what the panel shows rather than
+    an example from anywhere else.
+  </Step>
+
+  <Step title="Wait for verification">
+    Keyplar checks in the background and verifies the domain as soon as its DNS is live. That's
+    usually a few minutes, sometimes longer depending on your provider.
+
+    There's a **Check now** button if you're impatient, but you don't need to sit on it — the
+    background check keeps running either way.
+  </Step>
+
+  <Step title="Update your gateway URLs">
+    Once the domain is verified, your webhook and post-checkout redirect URLs use it. Go back to
+    **Settings**, copy the new URLs from each gateway panel, and update them at the gateway.
+
+    <Warning>
+      This step is easy to forget. The old `yourstore.keyplar.com` URLs keep working, so nothing
+      breaks — but your customers get redirected to the keyplar.com address after checkout, which
+      rather defeats the point.
+    </Warning>
+  </Step>
+</Steps>
+
+HTTPS is handled for you. There's no certificate to buy, upload or renew.
+
+## After it's live
+
+**Leave the DNS records in place.** Keyplar re-checks verified domains daily. If the records
+disappear, there's a grace period of about three days before routing is withdrawn — enough to
+survive a DNS provider hiccup, not enough to survive deleting the records.
+
+Your default `yourstore.keyplar.com` address stays active the whole time, and keeps working as a
+fallback.
+
+## If verification doesn't happen
+
+Keyplar keeps retrying, backing off as it goes — every few minutes at first, then every half
+hour, then hourly. After **7 days** it gives up. Pressing **Check now** restarts the schedule.
+
+Common causes:
+
+<AccordionGroup>
+  <Accordion title="The records aren't published yet" icon="clock">
+    DNS changes take time to propagate. Check with `dig shop.yourdomain.com` or your provider's
+    own lookup tool before assuming something's wrong.
+  </Accordion>
+  <Accordion title="A typo in the record name or value" icon="pen">
+    Compare character by character against the panel. Watch for providers that silently append
+    your domain to the record name — entering `shop.yourdomain.com` where the provider expects
+    just `shop` gives you `shop.yourdomain.com.yourdomain.com`.
+  </Accordion>
+  <Accordion title="A conflicting record already exists" icon="triangle-exclamation">
+    An existing A, AAAA or CNAME on the same hostname will win. Remove it first.
+  </Accordion>
+  <Accordion title="Proxying is turned on" icon="cloud">
+    If your DNS provider proxies traffic (Cloudflare's orange cloud, for instance), try turning it
+    off — "DNS only" — so Keyplar sees the record directly.
+  </Accordion>
+</AccordionGroup>
+
+## Changing or removing the domain
+
+Save a different domain to move, or clear the field to remove it. Either way your default
+`yourstore.keyplar.com` address remains active, so the store never goes dark.
+
+Remember to update your gateway webhook and redirect URLs after a change.
+
+## If you downgrade
+
+Custom domains need the branding entitlement. Drop to a plan without it and the domain stops
+routing — the store falls back to `yourstore.keyplar.com`. Nothing is deleted; re-subscribing to
+a plan with branding brings the domain back.

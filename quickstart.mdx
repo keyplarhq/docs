@@ -1,47 +1,136 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "Create a store, connect your gateway, and deliver your first purchase automatically."
+icon: "rocket"
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+This is the shortest path from nothing to a real, working purchase. Budget about 30 minutes,
+most of it spent in your payment gateway's dashboard.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+## Before you start
 
-## Prerequisites
+You need:
 
-Before you begin, you must have:
+- An account with **Stripe**, **Lemon Squeezy** or **Polar**, with at least one product already
+  set up there
+- Permission to create webhooks and edit checkout settings in that account
+- A card — every plan requires one at checkout, even during a trial
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+## Set up your store
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Create your store">
+    Go to [app.keyplar.com/signup](https://app.keyplar.com/signup), enter your email and pick a
+    store name. Your store address is derived from it: `https://yourstore.keyplar.com`.
 
-    ```bash
-    npm install your-package
-    ```
+    You'll get an email with a sign-in link. That link is the only way into your new store, so
+    open it on a device you can work from.
+
+    <Note>
+      Some names are reserved and can't be used as a store address — `app`, `www` and `api`
+      among them. The signup form tells you if the one you want is taken.
+    </Note>
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
-    ```
+  <Step title="Pick a plan">
+    You land in the admin panel with the full navigation visible, but most pages are walled off
+    until you subscribe. Open **Billing**, compare Starter and Pro, and subscribe.
+
+    If a trial is running, you still enter card details at checkout — you're just not charged
+    until the trial ends. See [Billing and plans](/billing) for what each plan includes.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
 
-    ```bash
-    your-cli start
-    ```
+  <Step title="Connect your payment gateway">
+    Open **Settings**. Each gateway has a panel holding two things you'll paste into the
+    gateway, and two things you'll paste back into Keyplar:
+
+    | Direction | What |
+    | --- | --- |
+    | Keyplar → gateway | Your webhook URL, `https://yourstore.keyplar.com/webhooks` |
+    | Keyplar → gateway | Your post-checkout redirect URL |
+    | Gateway → Keyplar | Secret key (or API key / access token) |
+    | Gateway → Keyplar | Webhook signing secret |
+
+    Follow the page for the gateway you use — the events to subscribe to and the exact redirect
+    syntax differ:
+
+    <CardGroup cols={3}>
+      <Card title="Stripe" href="/gateways/stripe" />
+      <Card title="Lemon Squeezy" href="/gateways/lemon-squeezy" />
+      <Card title="Polar" href="/gateways/polar" />
+    </CardGroup>
+
+    Secrets are encrypted before they're stored, and only your store can use them.
+  </Step>
+
+  <Step title="Create a benefit">
+    A benefit is the thing a customer actually receives. Open **Benefits** → **New benefit** and
+    create one — a **License key** benefit is the quickest to test, since it needs no file
+    upload.
+
+    Give it a name your customers will see (for example, `Pro license`), and leave the options
+    at their defaults for now.
+
+    See [Benefits overview](/benefits/overview) for all five types.
+  </Step>
+
+  <Step title="Create a product and map it to your gateway">
+    Open **Products** → **New product**. Name it, attach the benefit you just created, then fill
+    in the mapping field for your gateway:
+
+    | Gateway | Paste this ID |
+    | --- | --- |
+    | Stripe | Price ID (`price_…`) |
+    | Lemon Squeezy | Variant ID |
+    | Polar | Product ID |
+
+    This mapping is how an incoming purchase finds the right product. Get it wrong and the order
+    still arrives — Keyplar creates a placeholder product for it — but no benefits are delivered
+    until you fix the mapping.
+  </Step>
+
+  <Step title="Make a test purchase">
+    Buy your own product through your gateway's normal checkout, using a test card if the
+    gateway supports one.
+
+    After paying you should be redirected to your store and see the order — the product, the
+    benefit, and the license key — **without signing in**. That page stays valid for one hour.
+  </Step>
+
+  <Step title="Confirm it landed in admin">
+    Back in the admin panel, open **Orders**. The purchase should be listed, with the customer's
+    email and the benefit granted against it. **Licenses** shows the key that was issued.
+
+    If the order is there but the benefit isn't, the product mapping didn't match — check
+    **Products** for a placeholder product holding that purchase.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## What to do next
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+<CardGroup cols={2}>
+  <Card title="Import your history" icon="database" href="/import">
+    Backfill orders you made before Keyplar existed, so returning customers find their purchases
+    waiting.
+  </Card>
+  <Card title="Add downloads" icon="download" href="/benefits/downloads">
+    Upload the files your product actually ships.
+  </Card>
+  <Card title="Brand your store" icon="palette" href="/settings/store">
+    Store name, logo and which sign-in options customers see.
+  </Card>
+  <Card title="Use your own domain" icon="globe" href="/settings/custom-domain">
+    Serve the store at `shop.yourdomain.com` instead.
+  </Card>
+  <Card title="Validate keys from your app" icon="code" href="/api-reference/introduction">
+    Call the License API from your software.
+  </Card>
+  <Card title="Invite your team" icon="users" href="/settings/team">
+    Give colleagues admin access to the store.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Something not behaving? Email [support@keyplar.com](mailto:support@keyplar.com) with your store
+  address and, if it's about a specific purchase, the order's email.
 </Tip>

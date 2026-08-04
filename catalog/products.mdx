@@ -1,0 +1,132 @@
+---
+title: "Products"
+description: "Build the catalog that decides what each purchase delivers, and map it to your gateway."
+icon: "box"
+---
+
+Your catalog is the bridge between "someone paid" and "here's what they get". A Keyplar product
+holds the customer-facing details, the list of benefits it grants, and the external IDs that
+match it to purchases in your gateway.
+
+<Note>
+  Pricing lives on your gateway, not here. Keyplar products carry no price — they carry
+  entitlements.
+</Note>
+
+## Create a product
+
+Go to **Products** → **New product**.
+
+<ParamField path="Name" type="required">
+  Shown to customers on their orders. Up to 120 characters.
+</ParamField>
+
+<ParamField path="Badge" type="optional">
+  A short label shown next to the name — `Lifetime`, `Pro`, `Team`. Up to 40 characters.
+</ParamField>
+
+<ParamField path="Description" type="optional">
+  A short description customers see alongside the product.
+</ParamField>
+
+<ParamField path="Marketing link" type="optional">
+  A link to the product's page on your own site.
+</ParamField>
+
+<ParamField path="Status" type="active | archived">
+  Archived products stay attached to past orders and keep working — they're just out of the way.
+</ParamField>
+
+## Attach benefits
+
+Below the details, tick every benefit this product should grant. A benefit can be attached to
+any number of products, and a product can grant any number of benefits.
+
+Adding a benefit to a product applies to existing orders too — the next time a customer views an
+order containing that product, the new benefit is granted. Removing one takes it back, with one
+exception:
+
+<Warning>
+  Removing a **license key** benefit from a product does **not** revoke keys already issued. That
+  is deliberate — pulling a key out from under a running installation is rarely what you want. To
+  stop a specific key working, disable it from [Licenses](/licenses).
+</Warning>
+
+## Map to your gateway
+
+Each connected gateway gets a mapping field. Paste the external ID of the thing you sell there:
+
+| Gateway | Field | Looks like |
+| --- | --- | --- |
+| Stripe | Price ID | `price_1AbC2DefGh3IjKlM` |
+| Lemon Squeezy | Variant ID | `812345` |
+| Polar | Product ID | `f47ac10b-58cc-4372-a567-0e02b2c3d479` |
+
+Fill in only the gateways you actually sell that product through. One product can map to all
+three at once — the same buyer experience regardless of where the money came from.
+
+<Tip>
+  For Stripe, map the **Price** (`price_…`), not the Product (`prod_…`). Two prices for the same
+  Stripe product — monthly and annual — are two separate mappings, so they can grant different
+  benefits if you want them to.
+</Tip>
+
+## Auto-created products
+
+When a purchase arrives for an external ID that isn't mapped anywhere, Keyplar creates a
+placeholder product from what the gateway said, marks it **auto-created**, and records the order
+against it. Nothing is lost, but nothing is granted either — the placeholder has no benefits.
+
+You'll notice them as products you didn't create, usually named exactly as they are in your
+gateway.
+
+Fix one of two ways:
+
+<AccordionGroup>
+  <Accordion title="Adopt it" icon="pen">
+    If it's genuinely a product you hadn't set up yet, open it, give it a proper name, attach the
+    benefits it should grant, and leave the mapping as-is. Existing orders pick up the benefits
+    the next time they're viewed.
+  </Accordion>
+  <Accordion title="Merge it into the real product" icon="code-merge">
+    If you already have the real product and the placeholder is a duplicate, merge it. See below.
+  </Accordion>
+</AccordionGroup>
+
+## Merge duplicate products
+
+Open the product you want to get rid of and use **Merge into another product**. Pick the target,
+confirm, and:
+
+- The source's fields overwrite the target's
+- Benefits from both are combined
+- Gateway mappings move to the target
+- Past order lines are repointed at the target, so customer order history stays intact
+- The source is archived
+
+<Warning>
+  Merging overwrites the target's name, badge, description and link with the source's. If the
+  target is the one with the good copy, merge in the other direction, or fix the target
+  afterwards.
+</Warning>
+
+## A worked example
+
+You sell "Acme Editor Pro" as a one-off on Stripe and a monthly plan on Lemon Squeezy, and both
+should deliver the app download plus a license key.
+
+<Steps>
+  <Step title="Create the benefits once">
+    A **Download** benefit holding the installers, and a **License key** benefit with a 3-machine
+    activation limit.
+  </Step>
+  <Step title="Create one product">
+    Name it `Acme Editor Pro`, attach both benefits.
+  </Step>
+  <Step title="Map both gateways on that one product">
+    Stripe Price ID in the Stripe field, Lemon Squeezy Variant ID in the Lemon Squeezy field.
+  </Step>
+</Steps>
+
+Now a Stripe buyer and a Lemon Squeezy subscriber get identical delivery, and shipping a new
+version means uploading one file to one benefit.

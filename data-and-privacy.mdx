@@ -1,0 +1,133 @@
+---
+title: "Data and privacy"
+description: "What your customers can export and erase, what's retained for your accounting obligations, and what happens when a store closes."
+icon: "shield-check"
+---
+
+Your customers' data belongs to them, and the records of what they bought belong to your
+accountant. Keyplar's deletion behaviour is built around that tension. This page explains it so
+you can answer questions and write your own privacy policy.
+
+<Note>
+  For your customers' data, **you** are the data controller and Keyplar processes it on your
+  behalf. The wording below is written so you can adapt it directly.
+</Note>
+
+## Customers can export their own data
+
+From **Account** in the portal, a customer can download everything held about them as a JSON
+file: their profile, which sign-in methods are attached, every order including renewals, order
+lines, benefit grants (license keys, activations, download file details, links, any GitHub
+username they claimed) and their subscriptions.
+
+It's a pure read — exporting doesn't change anything.
+
+## Customers can delete their own account
+
+From **Account** → **Delete account**, confirmed by typing their email address.
+
+**Destroyed immediately:**
+
+1. GitHub collaborator access and any pending invitations. This runs first and must succeed — if
+   it fails, nothing else is deleted and they see an error, so an erasure is never reported while
+   access is still live.
+2. Every benefit grant, license key and activation.
+3. All sign-in credentials, OAuth connections and sessions.
+4. Their identifying details on the account — email, name and avatar are replaced with anonymous
+   placeholders.
+
+**Retained: the order records.** Orders, order lines and subscriptions survive, now pointing at
+an unidentifiable placeholder rather than a person.
+
+<Info>
+  **Why orders are kept.** They're your accounting and tax record. Transaction records have to be
+  retained for years — commonly 6 to 10, depending on where you are — and deleting them would put
+  you out of compliance in exchange for erasing data that no longer identifies anyone. What is
+  erased is everything linking those records to a person.
+</Info>
+
+### Two things worth knowing
+
+- **A live subscription blocks deletion.** An account with an active or past-due subscription
+  can't be deleted — the billing relationship lives at your payment gateway, and orphaning it
+  would keep charging someone nobody can identify. They cancel first.
+- **The email is freed.** If that person buys from you again later, they get a fresh account.
+  The erased one is never revived.
+
+Store admins can't delete their own account this way — they'd lock themselves out of a store
+that still exists. Admins remove themselves via [Team](/settings/team), or close the store.
+
+## When you close your store
+
+Deleting your store from [Billing](/billing#deleting-your-store):
+
+<Steps>
+  <Step title="Your Keyplar subscription is cancelled immediately">
+    Not at period end — there's no store left to serve.
+  </Step>
+  <Step title="The store goes offline at once">
+    Customers can't reach the portal, you can't reach the admin panel, and the License API stops
+    answering.
+  </Step>
+  <Step title="Everything is held for 30 days">
+    Catalog, orders, customers, licenses and uploaded files are kept, and the store is fully
+    restorable — from the page you land on at its address, or by contacting support.
+  </Step>
+  <Step title="Then it's permanently deleted">
+    GitHub access revoked, custom domain released, every uploaded file deleted from storage, and
+    every record removed. Nothing about the store or its customers remains.
+  </Step>
+</Steps>
+
+Restoring inside the window doesn't resume billing — the subscription was cancelled, so you pick
+a plan again from Billing.
+
+<Warning>
+  **Give your customers notice before you close.** The store goes offline the moment you delete
+  it, which means they can't export their data during the 30-day window. If they're going to want
+  their license keys and files, tell them while the portal is still up.
+</Warning>
+
+<Warning>
+  Closing your Keyplar store does **not** touch your payment gateway. Subscriptions there keep
+  charging your customers until you cancel them at the gateway.
+</Warning>
+
+## Retention at a glance
+
+| Data | Customer deletes their account | You close the store |
+| --- | --- | --- |
+| Profile, email, avatar | Anonymised immediately | Deleted after 30 days |
+| Sessions, sign-in credentials | Deleted immediately | Deleted after 30 days |
+| License keys, grants, activations | Deleted immediately | Deleted after 30 days |
+| GitHub collaborator access | Revoked immediately | Revoked |
+| Your uploaded download files | Untouched — they're yours | Deleted after 30 days |
+| Orders, order lines, subscriptions | **Retained** for tax and accounting | Deleted after 30 days |
+
+## Wording for your privacy policy
+
+Adapt this for your store. The retention period in brackets is a decision for you and your
+accountant, not something Keyplar sets.
+
+> **Deleting your account.** You can delete your account at any time from your account page. When
+> you do, we immediately and permanently delete your sign-in credentials, sessions, license keys,
+> download entitlements and any repository access granted to you, and we remove your name, email
+> address and avatar from our records.
+>
+> **What we must keep.** We keep the record of your purchases — order date, products, amounts,
+> tax and currency — because tax and accounting law requires us to retain transaction records for
+> [N] years. After your account is deleted these records no longer identify you: they are linked
+> to an anonymous placeholder, not to your name or email address. They are deleted when the
+> statutory retention period ends.
+>
+> **Exporting your data.** Before deleting, you can download everything we hold about you as a
+> JSON file from your account page.
+>
+> **If this store closes.** If the store is closed, all data — including the order records above —
+> is deleted within 30 days.
+
+## Store isolation
+
+Each Keyplar store is completely separate. The same email address at two stores is two unrelated
+accounts, and erasing one has no effect on the other. There's no path by which one store can read
+another's customers, orders or files.

@@ -1,0 +1,91 @@
+---
+title: "Managing licenses"
+sidebarTitle: "Licenses"
+description: "Find any issued key, see where it's activated, free a seat, disable it or issue a replacement."
+icon: "key"
+---
+
+**Licenses** in the admin panel lists every key your store has issued, across all products and
+gateways. It's where support requests about keys get resolved.
+
+For setting up the terms keys are issued under, see [License key
+benefits](/benefits/license-keys).
+
+## Find a key
+
+Search by key, customer email or product. Each row shows the key, its owner, its product and its
+current status.
+
+| Status | Meaning |
+| --- | --- |
+| `active` | In use on at least one machine |
+| `inactive` | Issued, never activated yet |
+| `expired` | Past its expiry date |
+| `disabled` | Switched off by you or by the gateway |
+| `revoked` | Order refunded, or subscription cancelled |
+
+## What a license page shows
+
+- The key itself
+- The customer, the order and the product it came from
+- Its activation limit and expiry, as captured when it was issued
+- Every activation, with the machine name your software sent and when it was created
+
+<Note>
+  Because terms are captured at issue time, two customers holding the "same" license benefit can
+  legitimately have different limits — one bought before you raised it.
+</Note>
+
+## Actions
+
+<AccordionGroup>
+  <Accordion title="Deactivate a seat" icon="laptop">
+    Frees one activation so the customer can use the key on a new machine. The usual fix for "I
+    reinstalled my OS and now it says I'm out of activations".
+
+    Customers can also do this themselves from **Licenses** in their portal.
+  </Accordion>
+
+  <Accordion title="Disable / enable a key" icon="ban">
+    Disabling makes the key stop validating immediately, without touching the order. Use it for a
+    key that's been shared publicly, or for a chargeback you're handling manually.
+
+    For keys owned by Lemon Squeezy or Polar, disabling syncs upstream — and a key disabled there
+    shows as disabled here.
+  </Accordion>
+
+  <Accordion title="Regenerate" icon="rotate">
+    Issues a fresh key in place of the old one, which stops working. Use it when a key has leaked
+    and the customer needs a clean one.
+
+    Only available where Keyplar owns the key:
+
+    | Gateway | Regenerate |
+    | --- | --- |
+    | Stripe | Available |
+    | Lemon Squeezy | Not available — the key lives upstream |
+    | Polar | Not available — the key lives upstream |
+
+    <Warning>
+      Existing activations stop working. Tell the customer to enter the new key everywhere before
+      you regenerate.
+    </Warning>
+  </Accordion>
+</AccordionGroup>
+
+## Common support situations
+
+| The customer says | What to do |
+| --- | --- |
+| "It says I've used all my activations" | Deactivate an unused seat from the license page |
+| "My key stopped working" | Check the status — `revoked` means the order was refunded or the subscription cancelled |
+| "I lost my key" | Send them a [24-hour account access link](/customers#help-a-customer-who-cant-sign-in); the key is on their order |
+| "My key is on a forum" | Disable it, then regenerate if the gateway allows |
+| "It expired but I'm still subscribed" | Check the subscription is actually active at the gateway; expiry is captured per key, so an old key may carry old terms |
+
+## Automatic revocation
+
+You rarely need to disable keys by hand. A key stops validating on its own when the order is
+refunded or the subscription behind it is cancelled — no action needed from you.
+
+The key itself isn't deleted in either case, so you can still see it and explain what happened.

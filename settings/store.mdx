@@ -1,0 +1,87 @@
+---
+title: "Store settings"
+sidebarTitle: "Store profile"
+description: "Your store name, logos, reporting currency, and which sign-in options customers see."
+icon: "store"
+---
+
+**Settings** holds everything about how your store presents itself, alongside your [gateway
+connections](/gateways/overview) and [custom domain](/settings/custom-domain).
+
+## Store profile
+
+<ParamField path="Store name" type="required">
+  Appears on the customer login page, order access pages and the dashboard sidebar.
+</ParamField>
+
+<ParamField path="Reporting currency">
+  The currency [analytics](/analytics) charts are shown in. It doesn't change what customers are
+  charged or what appears on their orders — those keep the currency the gateway used.
+</ParamField>
+
+## Logos
+
+<Note>
+  Logo upload is available on plans that include branding — the **Pro** plan. See [Billing and
+  plans](/billing).
+</Note>
+
+There are two shapes, each with a light and a dark variant:
+
+<AccordionGroup>
+  <Accordion title="Compact logo mark" icon="square">
+    Square artwork, used in the dashboard sidebar and other tight spaces. Upload one for light
+    backgrounds; the dark variant is optional and falls back to the light one.
+  </Accordion>
+  <Accordion title="Full logo" icon="rectangle-wide">
+    Horizontal artwork with a transparent background, used on the login and order access pages —
+    the first thing a customer sees. Again, the dark variant is optional.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Upload the dark variants even though they're optional. A logo designed for white backgrounds
+  usually disappears in dark mode, and customers do use it.
+</Tip>
+
+## "Powered by Keyplar"
+
+Stores on a plan without branding show a small "Powered by Keyplar" mark. Plans with branding
+remove it, along with unlocking logo upload and [custom domains](/settings/custom-domain).
+
+## Customer login
+
+Choose which sign-in options appear on your store's login page.
+
+| Method | Notes |
+| --- | --- |
+| **Magic link** | Always available. The default for most customers. |
+| **Password** | Always available for customers who set one from their account. |
+| **Google** | Toggle on to show "Continue with Google" |
+| **GitHub** | Toggle on to show "Continue with GitHub" |
+
+Google and GitHub sign-in use Keyplar's shared OAuth apps, so there's nothing to register — but
+the consent screen your customer sees will mention Keyplar.
+
+<Note>
+  There's no password *signup*. New customers arrive through a magic link, a social sign-in, or a
+  purchase — and can set a password afterwards from their account page. That's deliberate: an
+  account is created by buying, not by filling in a form.
+</Note>
+
+## Where to find other settings
+
+<CardGroup cols={2}>
+  <Card title="Payment gateways" icon="plug" href="/gateways/overview">
+    Credentials, webhook URL and checkout redirect.
+  </Card>
+  <Card title="Custom domain" icon="globe" href="/settings/custom-domain">
+    Serve the store at your own address.
+  </Card>
+  <Card title="Team" icon="users" href="/settings/team">
+    Who else can administer this store.
+  </Card>
+  <Card title="Billing" icon="credit-card" href="/billing">
+    Your plan, usage, invoices and payment method.
+  </Card>
+</CardGroup>

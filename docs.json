@@ -7,28 +7,112 @@
     "light": "#07C983",
     "dark": "#15803D"
   },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/favicon-light.svg",
+    "dark": "/favicon.svg"
+  },
   "navigation": {
-    "pages": [
+    "tabs": [
       {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "index",
+              "quickstart",
+              "concepts"
+            ]
+          },
+          {
+            "group": "Payment gateways",
+            "pages": [
+              "gateways/overview",
+              "gateways/stripe",
+              "gateways/lemon-squeezy",
+              "gateways/polar"
+            ]
+          },
+          {
+            "group": "Catalog and benefits",
+            "pages": [
+              "catalog/products",
+              "benefits/overview",
+              "benefits/downloads",
+              "benefits/license-keys",
+              "benefits/github-access"
+            ]
+          },
+          {
+            "group": "Running your store",
+            "pages": [
+              "orders",
+              "subscriptions",
+              "customers",
+              "licenses",
+              "analytics"
+            ]
+          },
+          {
+            "group": "Migrating",
+            "pages": [
+              "import"
+            ]
+          },
+          {
+            "group": "Store settings",
+            "pages": [
+              "settings/store",
+              "settings/custom-domain",
+              "settings/team"
+            ]
+          },
+          {
+            "group": "Billing and data",
+            "pages": [
+              "billing",
+              "customer-portal",
+              "data-and-privacy"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API reference",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "api-reference/introduction"
+            ]
+          },
+          {
+            "group": "Licenses",
+            "pages": [
+              "api-reference/licenses/validate",
+              "api-reference/licenses/activate",
+              "api-reference/licenses/deactivate"
+            ]
+          }
         ]
       }
     ],
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Dashboard",
+          "href": "https://app.keyplar.com",
+          "icon": "gauge"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Website",
+          "href": "https://keyplar.com",
+          "icon": "globe"
+        },
+        {
+          "anchor": "Support",
+          "href": "mailto:support@keyplar.com",
+          "icon": "envelope"
         }
       ]
     }
@@ -41,13 +125,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@keyplar.com"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "href": "https://app.keyplar.com"
     }
   },
   "contextual": {
@@ -61,12 +145,5 @@
       "cursor",
       "vscode"
     ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
   }
 }

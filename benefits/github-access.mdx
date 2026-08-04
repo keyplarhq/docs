@@ -1,0 +1,106 @@
+---
+title: "GitHub repository access"
+description: "Invite buyers to private repositories automatically, with the role you choose — and revoke it when they refund or cancel."
+icon: "github"
+---
+
+<Note>
+  GitHub repository access is available on the **Pro** plan. See [Billing and plans](/billing).
+</Note>
+
+Sell source code, a private SDK or a paid template? A **GitHub Repository Access** benefit
+invites each buyer to the repositories you pick, at the role you pick, and withdraws access when
+they refund or cancel.
+
+## One-time setup: install the GitHub App
+
+Keyplar needs permission on your GitHub organization or account before it can send invitations.
+
+<Steps>
+  <Step title="Start the install from Keyplar">
+    **Benefits** → **New benefit** → **GitHub Repository Access**. The repository picker offers
+    an **Install the GitHub App** link.
+
+    Starting from here matters — the install is bound to your store, so the picker later shows
+    only your own repositories.
+  </Step>
+  <Step title="Choose where to install it">
+    On GitHub, pick the organization or personal account holding the repositories you sell, and
+    grant it access to those repositories. You can grant all, or select individually.
+  </Step>
+  <Step title="Come back and refresh">
+    Return to the benefit. The picker now lists the repositories the App can reach.
+  </Step>
+</Steps>
+
+<Tip>
+  Granting access to selected repositories rather than all of them is the safer default. You can
+  add more later from GitHub's app settings.
+</Tip>
+
+## Configure the benefit
+
+Add one row per repository. Each row takes a repository and a **Role**:
+
+| Role | What the customer can do |
+| --- | --- |
+| **Read** | Clone and read. The usual choice for selling source code. |
+| **Triage** | Read, plus manage issues and pull requests without write access. |
+| **Write** | Push commits. |
+| **Maintain** | Manage the repository without access to destructive actions. |
+| **Admin** | Full control, including settings and deletion. |
+
+<Warning>
+  Anything above **Read** lets customers change your repository. Unless you're deliberately
+  running a paid collaboration, Read is what you want.
+</Warning>
+
+You can list several repositories on one benefit, each with its own role — a paid bundle of a
+main repo plus example projects, say.
+
+## What the customer sees
+
+After buying, the invitation appears on their order and under **Git repos** in their portal. It
+isn't sent automatically, because Keyplar doesn't know their GitHub username until they say so.
+
+They enter their username and claim it. Keyplar then invites that account to every repository on
+the benefit, and GitHub emails them the invitation to accept.
+
+<Warning>
+  Claiming is **one-shot**. The customer enters one GitHub username and it cannot be changed
+  afterwards — the form says so before they submit. If someone claims with the wrong account,
+  they need your help: revoke the grant and re-issue it.
+</Warning>
+
+## Revoking access
+
+Access is withdrawn automatically when:
+
+- The order is refunded
+- The subscription behind it is cancelled
+- The customer deletes their account
+- You delete the grant
+
+Revocation reaches GitHub itself — the collaborator is removed from every repository on the
+benefit, and any invitation they hadn't accepted yet is cancelled. It isn't just hidden in the
+portal.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The repository picker is empty" icon="folder-open">
+    The GitHub App isn't installed yet, or it's installed without access to any repositories.
+    Use the install link in the picker, and check on GitHub that the repositories you want are
+    included in the installation.
+  </Accordion>
+  <Accordion title="A customer claimed with the wrong username" icon="user-xmark">
+    Find their order under **Orders**, remove the grant, and let the benefit be re-granted — they
+    can then claim again with the right account. Revoking removes the wrong account from the
+    repository as part of the same step.
+  </Accordion>
+  <Accordion title="The customer never got GitHub's email" icon="envelope">
+    GitHub sends the invitation, not Keyplar. Ask them to check
+    [github.com/notifications](https://github.com/notifications) — pending repository invitations
+    are listed there, and on the repository page itself, even if the email went missing.
+  </Accordion>
+</AccordionGroup>

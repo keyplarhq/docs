@@ -1,0 +1,104 @@
+---
+title: "License keys"
+description: "Issue keys automatically on purchase, control expiry and how many machines can activate, and validate from your own software."
+icon: "key"
+---
+
+A **License Keys** benefit is a template. Every customer who buys a product carrying it gets
+their own key, issued automatically at purchase.
+
+## Create the benefit
+
+**Benefits** → **New benefit** → **License Keys**. Name it for customers (`Pro license`), then
+set the terms:
+
+<ParamField path="Key prefix" type="optional">
+  A short string at the front of every key from this benefit, so you can tell at a glance which
+  product a key came from — `ACME`, `PRO`, `TEAM`.
+</ParamField>
+
+<ParamField path="Expires" type="optional">
+  Off by default (keys never expire). Turn it on and set a duration — a number plus **days**,
+  **months** or **years**. The clock starts when the key is issued.
+</ParamField>
+
+<ParamField path="Limit activations" type="optional">
+  Off by default (unlimited machines). Turn it on and set the maximum number of machines that can
+  hold an active activation at once.
+</ParamField>
+
+<Warning>
+  Expiry and activation limit are captured on each key **at the moment it's issued**. Raising the
+  limit on the benefit gives new customers more machines; it doesn't change keys already out
+  there. Change an individual key from [Licenses](/licenses).
+</Warning>
+
+## Activations and seats
+
+An **activation** — sometimes called an instance — is one machine, install or device using a key.
+Your software creates one on first run and stores the ID it gets back.
+
+When the activation limit is reached, further activations are refused until a seat is freed. Both
+you and the customer can free one:
+
+- The customer deactivates a machine from **Licenses** in their portal
+- You deactivate one from **Licenses** in the admin panel
+- Your software calls the [deactivate endpoint](/api-reference/licenses/deactivate) — the right
+  thing to do on uninstall or sign-out
+
+## Key statuses
+
+Every key resolves to exactly one status. This is what the [License
+API](/api-reference/licenses/validate) reports, and what you see in the admin panel:
+
+| Status | Meaning | Valid? |
+| --- | --- | --- |
+| `active` | Issued and in use on at least one machine | Yes |
+| `inactive` | Issued but never activated anywhere yet | Yes |
+| `expired` | Past its expiry date | No |
+| `disabled` | Switched off by you, or by the gateway that owns it | No |
+| `revoked` | The order was refunded, or the subscription behind it was cancelled | No |
+
+<Note>
+  `inactive` is not a problem — it just means nobody has activated the key yet. It's still a
+  perfectly good key.
+</Note>
+
+## Validating from your software
+
+Your app talks to the License API using a server-side API key. The usual pattern:
+
+<Steps>
+  <Step title="Activate once">
+    On first run, call **activate** with the customer's key and a name for the machine. Store the
+    `instance.id` you get back.
+  </Step>
+  <Step title="Validate on launch">
+    Call **validate** with the key and the stored `instance.id`. Check `valid`.
+  </Step>
+  <Step title="Deactivate on the way out">
+    On uninstall or sign-out, call **deactivate** so the customer gets their seat back.
+  </Step>
+</Steps>
+
+<Card title="License API reference" icon="code" href="/api-reference/introduction">
+  Endpoints, request and response shapes, error handling, and code samples.
+</Card>
+
+## Who owns the key
+
+This depends on the gateway the order came from, and it decides whether you can regenerate a key:
+
+| Gateway | Keys issued by | Can you regenerate? |
+| --- | --- | --- |
+| Stripe | Keyplar | **Yes** |
+| Lemon Squeezy | Lemon Squeezy | No — the key lives upstream |
+| Polar | Polar | No — the key lives upstream |
+
+For Lemon Squeezy and Polar, disabling a key and deactivating seats still work and sync in both
+directions. Only regeneration is unavailable.
+
+## Managing issued keys
+
+Everything you can do to a customer's key lives on [Licenses](/licenses): search, view
+activations, disable and re-enable, free a seat, and regenerate where supported.

@@ -1,0 +1,104 @@
+---
+title: "Benefits"
+sidebarTitle: "Overview"
+description: "The five things a product can deliver, and the rules that govern all of them."
+icon: "gift"
+---
+
+A benefit is a reusable definition of something a customer receives. You create it once under
+**Benefits**, then attach it to as many [products](/catalog/products) as you like.
+
+## The five types
+
+<CardGroup cols={2}>
+  <Card title="File Downloads" icon="download" href="/benefits/downloads">
+    Files served through signed, expiring links. Versioned, and switchable on and off without
+    deleting anything.
+  </Card>
+  <Card title="License Keys" icon="key" href="/benefits/license-keys">
+    A key per customer, with optional expiry and activation limits, validated by your software
+    through the License API.
+  </Card>
+  <Card title="GitHub Repository Access" icon="github" href="/benefits/github-access">
+    Invite the buyer to private repositories, with the role you choose. **Pro plan.**
+  </Card>
+  <Card title="Link & Custom" icon="link" href="#link">
+    A set of URLs, or a Markdown note. The catch-all for Discord invites, onboarding docs and
+    anything else.
+  </Card>
+</CardGroup>
+
+## Create a benefit
+
+**Benefits** → **New benefit**. Pick the type, give it a **Name** — this is shown to customers,
+so write it for them (`Acme Editor installers`, not `dl-benefit-v2`) — then fill in the options
+for that type.
+
+<Note>
+  A benefit's type is fixed once created. If you picked the wrong one, create a new benefit and
+  swap it on the product.
+</Note>
+
+## Link
+
+One or more URLs the customer can open after purchase. Each entry takes a **URL** and an optional
+**Title**.
+
+Good for: a private Discord invite, a members-only page, a Notion onboarding doc, a Figma file.
+
+<Warning>
+  A link benefit hands out the same URL to everyone who buys. Anyone who shares it shares access.
+  Use it for things where that's acceptable, or where the destination does its own gating.
+</Warning>
+
+## Custom
+
+A Markdown note shown to the customer on their order. Good for instructions, redemption codes you
+issue by hand, or explaining something a structured type doesn't cover.
+
+Formatting is standard Markdown — headings, lists, links, code.
+
+## Rules that apply to every type
+
+### Edits apply to new grants only
+
+For license keys, the **expiry** and **activation limit** are captured on each customer's key at
+the moment it's issued. Changing the benefit later doesn't rewrite keys already out there. To
+change one customer's key, go to [Licenses](/licenses).
+
+Downloads and links behave the opposite way, and deliberately: they're read live. Add a file to a
+download benefit and every customer who owns it sees the new file immediately. Turn a file off
+and it disappears from their portal at once.
+
+### One benefit, many products
+
+Attaching the same license benefit to five products doesn't create five templates — it's one
+definition. Change the activation limit and all five products issue keys under the new terms from
+then on.
+
+### Refunds and cancellations revoke
+
+| What happened | What Keyplar does |
+| --- | --- |
+| Order refunded | Revokes the order's benefits, blocks downloads, stops licenses validating, removes GitHub access |
+| Subscription cancelled | Revokes the benefits for that subscription's product |
+| Benefit detached from a product | Removes the grant — **except** license keys, which persist |
+
+GitHub revocation reaches upstream: the collaborator is removed from the repository and any
+pending invitation is cancelled.
+
+### Deleting a benefit
+
+Deleting a benefit removes it from every product and from the customers holding it. If you only
+want to stop granting it going forward, detach it from the products instead — existing customers
+keep what they have.
+
+## Which type for which job
+
+| You want to deliver | Use |
+| --- | --- |
+| An installer, a ZIP, an ebook, source code | [File Downloads](/benefits/downloads) |
+| A key your app checks at startup | [License Keys](/benefits/license-keys) |
+| Access to a private repo | [GitHub Repository Access](/benefits/github-access) |
+| A Discord invite or members-only URL | Link |
+| Instructions, a hand-issued code, an explanation | Custom |

@@ -1,0 +1,122 @@
+---
+title: "How Keyplar thinks"
+sidebarTitle: "Core concepts"
+description: "Orders, products and benefits — the small model that explains every screen in the admin panel."
+icon: "diagram-project"
+---
+
+Almost every question about Keyplar — why a customer didn't get their key, why editing a benefit
+didn't change an existing license, why a refund revoked one thing but not another — is answered
+by one chain:
+
+<Info>
+  **Order → products → benefits.** An order contains products. Products carry benefits. A
+  customer holds a benefit only because they own an order containing a product that grants it.
+</Info>
+
+Benefits are never attached to an order directly. That indirection is what lets you change what
+a product delivers without editing thousands of orders.
+
+## The pieces
+
+<AccordionGroup>
+  <Accordion title="Store" icon="store">
+    Your Keyplar instance: `https://yourstore.keyplar.com`, or your own domain. It holds your
+    catalog, your customers, your orders and your gateway connections. Stores are completely
+    isolated from each other — a customer who buys from two Keyplar stores has two unrelated
+    accounts.
+  </Accordion>
+
+  <Accordion title="Gateway" icon="credit-card">
+    Where the money changes hands: Stripe, Lemon Squeezy or Polar. Keyplar never processes
+    payments. It listens to your gateway, and after that it keeps its own record of what
+    happened. You can connect more than one gateway to the same store.
+  </Accordion>
+
+  <Accordion title="Product" icon="box">
+    An entry in **your** catalog — not the product in your gateway. A Keyplar product carries a
+    name, an optional badge and description, and the list of benefits it grants. It's linked to
+    the gateway through an external ID mapping (a Stripe Price ID, a Lemon Squeezy Variant ID, a
+    Polar Product ID).
+
+    One Keyplar product can map to several gateways at once, which is how "the same product,
+    sold in two places" stays one thing for your customers.
+  </Accordion>
+
+  <Accordion title="Benefit" icon="gift">
+    A reusable definition of something a customer receives: a download, a license key, a link,
+    a custom note, or GitHub repository access. You define it once and attach it to as many
+    products as you like.
+  </Accordion>
+
+  <Accordion title="Order" icon="receipt">
+    One payment, recorded permanently against the buyer's email. It lists the products bought.
+    Subscription renewals are orders too — they're just hidden from the main lists so your
+    order history stays readable.
+  </Accordion>
+
+  <Accordion title="Customer" icon="user">
+    One account per email address in your store. Login identity and purchase identity are the
+    same thing: if someone buys before they've ever signed in, Keyplar creates their account
+    from the order, and their first sign-in claims it.
+  </Accordion>
+
+  <Accordion title="Subscription" icon="rotate">
+    Created only when your gateway tells Keyplar a subscription exists. Its renewals show up as
+    linked payments. Cancelling revokes the benefits that came with it.
+  </Accordion>
+</AccordionGroup>
+
+## Five rules worth knowing up front
+
+### Your catalog decides what gets delivered
+
+When a purchase arrives, Keyplar looks up the external product ID against your catalog mapping.
+That match is the only thing that determines which benefits are granted. The gateway's own idea
+of "benefits" or "files" is not consulted at delivery time.
+
+### An unmapped purchase still becomes an order
+
+If a purchase arrives for an ID you haven't mapped, Keyplar doesn't reject it. It creates a
+placeholder product so the order and the customer are recorded, and grants nothing. You fix it
+by mapping that ID — either on the placeholder or by [merging it](/catalog/products#merge-duplicate-products)
+into the real product.
+
+### Orders belong to an email, permanently
+
+An order is bound to the email address that bought it. Nothing reassigns it — not signing in
+with a different account, not opening a shared order link. If a customer bought under the wrong
+address, the fix is a [support link](/customers#help-a-customer-who-cannot-sign-in), not a
+transfer.
+
+### Editing a benefit doesn't rewrite what's already issued
+
+License expiry and activation limits are captured on each grant at the moment it's issued.
+Raising the activation limit on the benefit affects future customers, not the keys already in
+the wild. Existing keys are changed one at a time from **Licenses**.
+
+### Refunds and cancellations revoke automatically
+
+A refunded order revokes its grants and blocks its downloads. A cancelled subscription revokes
+the benefits for that subscription's product. GitHub access is withdrawn upstream — the
+collaborator is removed and any pending invitation is cancelled.
+
+Licenses are the exception to disappearing entirely: a license key survives so you can still see
+it, but it stops validating.
+
+## How a purchase reaches your customer
+
+Keyplar hears about a purchase two ways, and uses both on purpose:
+
+| Path | What it's for |
+| --- | --- |
+| **Post-checkout redirect** | Instant. The customer is bounced back to your store, the order is fulfilled on the spot, and they see it immediately — no waiting on a webhook, no email round-trip. |
+| **Webhook** | Everything else. Refunds, renewals, subscription changes, and buyers who close the tab before the redirect. |
+
+Both are safe to fire for the same purchase. Every event is deduplicated, so nothing is ever
+granted twice.
+
+<Note>
+  Set up both. The redirect alone misses refunds and renewals; webhooks alone make your customer
+  wait and give them nothing to look at on the thank-you page.
+</Note>

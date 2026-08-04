@@ -1,0 +1,88 @@
+---
+title: "Customers"
+description: "Look up a buyer, see everything they own, and unblock them when sign-in fails."
+icon: "user"
+---
+
+**Customers** lists everyone with an account in your store — people who bought, people who were
+invited, and people whose accounts were created from an order before they ever signed in.
+
+## How accounts get created
+
+Keyplar creates a customer account the first time it sees an email address, whether that's from a
+purchase or a sign-in. There's no separate "register" step for buyers:
+
+<Steps>
+  <Step title="Someone buys">
+    Keyplar records the order and creates an account for the buyer's email, with no password and
+    no login method attached.
+  </Step>
+  <Step title="They sign in later">
+    A magic link, Google or GitHub sign-in with that same address claims the existing account —
+    orders and everything else already waiting for them.
+  </Step>
+</Steps>
+
+<Note>
+  Identity is the email address. Someone who buys with a work address and signs in with a
+  personal one has two separate accounts, each holding its own orders.
+</Note>
+
+## What a customer page shows
+
+- Their orders, subscriptions and licenses
+- Their active sessions
+- Their role in your store
+- The support actions below
+
+## Help a customer who can't sign in
+
+Use **Account access link**. It generates a URL that signs them into their **full portal** — every
+order, every benefit — good for **24 hours**.
+
+Keyplar doesn't email it. Copy it and send it through whatever support channel you're already
+talking to them on.
+
+<Tip>
+  This is the fix for the common cases: a corporate mail filter eating sign-in links, a typo'd
+  address, an old inbox they can't reach any more. It's a session, not a password reset — they
+  can set a password from **Account** once they're in.
+</Tip>
+
+If they only need one specific order, the [1-hour signed order link](/orders#help-a-customer-who-cant-get-to-their-order)
+is the narrower tool.
+
+## Impersonate
+
+Opens the portal as that customer, so you can see exactly what they see. A banner stays on screen
+the whole time with a way out.
+
+You can't impersonate yourself, and you can't impersonate another admin.
+
+<Warning>
+  Impersonation shows you the customer's account, including their license keys and download
+  links. Use it to diagnose, not to browse.
+</Warning>
+
+## Ban
+
+Blocks sign-in and revokes the account's active sessions. Orders and granted benefits are left
+alone — a ban stops someone getting in, it doesn't erase what they bought.
+
+Unbanning restores access.
+
+## Roles
+
+The customer page is also where you see whether someone is an admin of your store. Granting and
+removing admin access is done from [Team](/settings/team), which enforces your plan's seat limit
+and stops you removing the last admin.
+
+Admins and customers share one accounts table: an admin who buys something is just an order owner
+on the same account. Removing someone's admin access keeps their account, orders and benefits
+intact.
+
+## Customer-initiated deletion
+
+Customers can delete their own account from **Account** in the portal. See [Data and
+privacy](/data-and-privacy) for exactly what's destroyed, what's retained for your accounting
+obligations, and why an account with a live subscription can't be deleted.
