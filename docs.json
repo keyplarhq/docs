@@ -134,6 +134,11 @@
       "href": "https://app.keyplar.com"
     }
   },
+  "integrations": {
+    "gtm": {
+      "tagId": "GTM-TP76RR2Z"
+    }
+  },
   "contextual": {
     "options": [
       "copy",
